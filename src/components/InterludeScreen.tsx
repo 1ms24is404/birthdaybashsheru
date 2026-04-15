@@ -22,6 +22,11 @@ export default function InterludeScreen({ onNext }: any) {
   useEffect(() => {
     setTimeout(() => setStart(true), 100);
 
+    // 🎵 PLAY PERFECT
+    const audio = new Audio("/music/perfect.mp3");
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+
     let index = 0;
 
     const runSlide = () => {
@@ -30,7 +35,7 @@ export default function InterludeScreen({ onNext }: any) {
       setTimeout(() => {
         setCurrent(index);
         setVisible(true);
-      }, 50); // synced start
+      }, 50);
 
       setTimeout(() => {
         index++;
@@ -41,14 +46,19 @@ export default function InterludeScreen({ onNext }: any) {
             setFadeOut(true);
 
             setTimeout(() => {
+              audio.pause(); // stop when leaving
               onNext();
             }, 1200);
           }, 1000);
         }
-      }, 6200); // FULL duration (text + image together)
+      }, 6200);
     };
 
     runSlide();
+
+    return () => {
+      audio.pause();
+    };
   }, []);
 
   return (
