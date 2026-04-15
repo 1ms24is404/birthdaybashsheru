@@ -23,8 +23,7 @@ Yours, always & forever ♾️`;
 
 const photos = [
   "collage1.jpeg", "collage2.jpeg", "collage3.jpeg",
-  "collage4.jpeg", "collage5.jpeg", "collage6.jpeg",
-  "collage7.jpeg", "collage8.jpeg", "collage9.jpeg",
+  "collage4.jpeg", "collage5.jpeg", "collage6.jpeg"
 ];
 
 const FinalScreen = ({}: FinalScreenProps) => {
