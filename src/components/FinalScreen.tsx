@@ -18,8 +18,12 @@ With all my heart,
 Yours, always & forever ♾️`;
 
 const photos = [
-"collage1.jpeg", "collage2.jpeg", "collage3.jpeg",
-"collage4.jpeg", "collage5.jpeg", "collage6.jpeg"
+"collage1.jpeg",
+"collage2.jpeg",
+"collage3.jpeg",
+"collage4.jpeg",
+"collage5.jpeg",
+"collage6.jpeg",
 ];
 
 const FinalScreen = ({}: FinalScreenProps) => {
@@ -27,19 +31,28 @@ const [displayedText, setDisplayedText] = useState("");
 const [showCollage, setShowCollage] = useState(false);
 
 useEffect(() => {
-let i = 0;
-const timer = setInterval(() => {
-if (i < LETTER.length) {
-setDisplayedText(LETTER.slice(0, i + 1));
-i++;
-} else {
-clearInterval(timer);
-setTimeout(() => setShowCollage(true), 500);
-}
-}, 30);
+// 🎵 PLAY PERFECT
+const audio = new Audio("/music/perfect.mp3");
+audio.volume = 0.6;
+audio.loop = true;
+audio.play().catch(() => {});
 
 ```
-return () => clearInterval(timer);
+let i = 0;
+const timer = setInterval(() => {
+  if (i < LETTER.length) {
+    setDisplayedText(LETTER.slice(0, i + 1));
+    i++;
+  } else {
+    clearInterval(timer);
+    setTimeout(() => setShowCollage(true), 500);
+  }
+}, 30);
+
+return () => {
+  clearInterval(timer);
+  audio.pause();
+};
 ```
 
 }, []);
