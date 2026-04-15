@@ -5,7 +5,7 @@ const slides = [
   { text: "And suddenly everything made sense 💖", image: "/slides/slide2.jpeg" },
   { text: "Every moment with you feels magical ✨", image: "/slides/slide3.jpeg" },
   { text: "You are my safe place 🫶", image: "/slides/slide4.jpeg" },
-  { text: "My favorite person, always ❤️", image: "/slides/slide5.jpeg" },
+  { text: "My favorite person, always ❤️,this always reminds me of you", image: "/slides/slide5.jpeg" },
   { text: "With you, I feel complete 🌍", image: "/slides/slide6.jpeg" },
   { text: "Every memory with you is my treasure 💎", image: "/slides/slide7.jpeg" },
   { text: "I never want to lose you 🥺", image: "/slides/slide8.jpeg" },
@@ -16,8 +16,12 @@ const slides = [
 export default function InterludeScreen({ onNext }: any) {
   const [current, setCurrent] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+  const [start, setStart] = useState(false);
 
   useEffect(() => {
+    setTimeout(() => setStart(true), 100);
+
     const audio = new Audio("/music/interlude.mp3");
     audio.volume = 0.7;
     audio.play().catch(() => {});
@@ -29,7 +33,7 @@ export default function InterludeScreen({ onNext }: any) {
 
       setTimeout(() => {
         setCurrent(index);
-        setVisible(true); // start animation
+        setVisible(true);
       }, 100);
 
       setTimeout(() => {
@@ -38,11 +42,15 @@ export default function InterludeScreen({ onNext }: any) {
           runSlide();
         } else {
           setTimeout(() => {
-            audio.pause();
-            onNext();
+            setFadeOut(true);
+
+            setTimeout(() => {
+              audio.pause();
+              onNext();
+            }, 1200);
           }, 1000);
         }
-      }, 6200); // TOTAL duration
+      }, 6200);
     };
 
     runSlide();
@@ -53,8 +61,15 @@ export default function InterludeScreen({ onNext }: any) {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-
+    <div
+      className={`flex flex-col items-center justify-center min-h-screen px-6 text-center transition-all duration-1000 ${
+        fadeOut
+          ? "opacity-0 scale-95"
+          : start
+          ? "opacity-100 scale-100"
+          : "opacity-0 scale-110"
+      }`}
+    >
       {/* IMAGE */}
       <img
         src={slides[current].image}
@@ -71,7 +86,6 @@ export default function InterludeScreen({ onNext }: any) {
       >
         {slides[current].text}
       </h2>
-
     </div>
   );
 }
