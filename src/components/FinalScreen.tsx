@@ -69,16 +69,19 @@ const FinalScreen = ({}: FinalScreenProps) => {
               Our Moments 📸
             </h3>
             <div className="grid grid-cols-3 gap-2 md:gap-3 mb-12">
-              {photos.map((photo, i) => (
-                <div
-                  key={photo}
-                  className="aspect-square rounded-xl overflow-hidden bg-muted border border-border flex items-center justify-center text-muted-foreground text-xs animate-scale-in"
-                  style={{ animationDelay: `${i * 0.1}s`, opacity: 0 }}
-                >
-                  📷 {photo}
-                </div>
-              ))}
-            </div>
+  {photos.map((photo, i) => (
+    <div
+      key={photo}
+      className="aspect-square rounded-xl overflow-hidden bg-muted border border-border animate-scale-in"
+      style={{ animationDelay: `${i * 0.1}s`, opacity: 0 }}
+    >
+      <img 
+        src={`/collage/${photo}`} 
+        className="w-full h-full object-cover"
+      />
+    </div>
+  ))}
+</div>
 
             {/* Signature */}
             <div className="text-center animate-fade-in-up" style={{ animationDelay: "1s", opacity: 0 }}>
