@@ -15,6 +15,7 @@ const slides = [
 
 export default function InterludeScreen({ onNext }: any) {
   const [current, setCurrent] = useState(0);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const audio = new Audio("/music/interlude.mp3");
@@ -23,45 +24,53 @@ export default function InterludeScreen({ onNext }: any) {
 
     let index = 0;
 
-    const interval = setInterval(() => {
-      index++;
-      if (index < slides.length) {
+    const runSlide = () => {
+      setVisible(false);
+
+      setTimeout(() => {
         setCurrent(index);
-      } else {
-        clearInterval(interval);
-        setTimeout(() => {
-          audio.pause();
-          onNext();
-        }, 2000);
-      }
-    }, 6000); // speed of slides
+        setVisible(true); // start animation
+      }, 100);
+
+      setTimeout(() => {
+        index++;
+        if (index < slides.length) {
+          runSlide();
+        } else {
+          setTimeout(() => {
+            audio.pause();
+            onNext();
+          }, 1000);
+        }
+      }, 6200); // TOTAL duration
+    };
+
+    runSlide();
 
     return () => {
       audio.pause();
-      clearInterval(interval);
     };
   }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
 
-      <div
-        key={current}
-        className="transition-all duration-700 ease-in-out animate-fade-in-up"
+      {/* IMAGE */}
+      <img
+        src={slides[current].image}
+        className="w-[320px] h-[320px] object-cover rounded-xl mb-6 shadow-lg transition-all duration-1000"
+      />
+
+      {/* TEXT */}
+      <h2
+        className={`text-2xl md:text-3xl font-semibold text-white transition-all duration-[4000ms] ${
+          visible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-10"
+        }`}
       >
-
-        {/* IMAGE */}
-        <img
-          src={slides[current].image}
-          className="w-[300px] h-[300px] object-cover rounded-xl mb-6 shadow-lg"
-        />
-
-        {/* TEXT */}
-        <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">
-          {slides[current].text}
-        </h2>
-
-      </div>
+        {slides[current].text}
+      </h2>
 
     </div>
   );
