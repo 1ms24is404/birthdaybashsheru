@@ -5,58 +5,44 @@ const slides = [
   { text: "And suddenly everything made sense 💖", image: "/slides/slide2.jpeg" },
   { text: "Every moment with you feels magical ✨", image: "/slides/slide3.jpeg" },
   { text: "You are my safe place 🫶", image: "/slides/slide4.jpeg" },
-  { text: "My favorite person, always ❤️,this always reminds me of you", image: "/slides/slide5.jpeg" },
+  { text: "My favorite person, always ❤️", image: "/slides/slide5.jpeg" },
   { text: "With you, I feel complete 🌍", image: "/slides/slide6.jpeg" },
-  { text: "Every memory with you is my treasure 💎", image: "/slides/slide7.jpeg" },
-  { text: "I never want to lose you 🥺", image: "/slides/slide8.jpeg" },
-  { text: "You are my forever ♾️", image: "/slides/slide9.jpeg" },
-  { text: "And I will always choose you 💕", image: "/slides/slide10.jpeg" },
 ];
 
 export default function InterludeScreen({ onNext }: any) {
   const [current, setCurrent] = useState(0);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
-  const [start, setStart] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setStart(true), 100);
-
-    // 🎵 PLAY PERFECT
     const audio = new Audio("/music/perfect.mp3");
     audio.volume = 0.6;
     audio.play().catch(() => {});
 
     let index = 0;
 
-    const runSlide = () => {
+    const interval = setInterval(() => {
       setVisible(false);
-
-      setTimeout(() => {
-        setCurrent(index);
-        setVisible(true);
-      }, 50);
 
       setTimeout(() => {
         index++;
         if (index < slides.length) {
-          runSlide();
+          setCurrent(index);
+          setVisible(true);
         } else {
+          clearInterval(interval);
+          setFadeOut(true);
+
           setTimeout(() => {
-            setFadeOut(true);
-
-            setTimeout(() => {
-              audio.pause(); // stop when leaving
-              onNext();
-            }, 1200);
-          }, 1000);
+            audio.pause();
+            onNext();
+          }, 1200);
         }
-      }, 6200);
-    };
-
-    runSlide();
+      }, 4000); // text transition
+    }, 6200); // total duration
 
     return () => {
+      clearInterval(interval);
       audio.pause();
     };
   }, []);
@@ -64,25 +50,17 @@ export default function InterludeScreen({ onNext }: any) {
   return (
     <div
       className={`flex flex-col items-center justify-center min-h-screen px-6 text-center transition-all duration-1000 ${
-        fadeOut
-          ? "opacity-0 scale-95"
-          : start
-          ? "opacity-100 scale-100"
-          : "opacity-0 scale-110"
+        fadeOut ? "opacity-0 scale-95" : "opacity-100 scale-100"
       }`}
     >
-      {/* IMAGE */}
       <img
         src={slides[current].image}
         className="w-[320px] h-[320px] object-cover rounded-xl mb-6 shadow-lg transition-all duration-1000"
       />
 
-      {/* TEXT */}
       <h2
-        className={`text-2xl md:text-3xl font-semibold text-white transition-all duration-[6200ms] ${
-          visible
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-10"
+        className={`text-2xl md:text-3xl font-semibold text-white transition-all duration-[4000ms] ${
+          visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         }`}
       >
         {slides[current].text}
