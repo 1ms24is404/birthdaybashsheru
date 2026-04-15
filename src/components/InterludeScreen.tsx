@@ -34,7 +34,7 @@ export default function InterludeScreen({ onNext }: any) {
           onNext();
         }, 2000);
       }
-    }, 2500); // speed of slides
+    }, 6000); // speed of slides
 
     return () => {
       audio.pause();
