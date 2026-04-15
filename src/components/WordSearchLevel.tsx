@@ -43,7 +43,6 @@ function generateGrid(): { grid: string[][]; placements: Map<string, number[][]>
     }
   }
 
-  // Fill empty cells
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   for (let r = 0; r < GRID_SIZE; r++) {
     for (let c = 0; c < GRID_SIZE; c++) {
@@ -54,22 +53,12 @@ function generateGrid(): { grid: string[][]; placements: Map<string, number[][]>
   return { grid, placements };
 }
 
-const hints: Record<string, string> = {
-  BBG: "Three letters, a cute nickname… look diagonally 💕",
-  FOREVER: "Something that never ends… maybe horizontal? ♾️",
-  TOGETHER: "What we are… scan every direction 🤝",
-  SEVEN: "A lucky number… could be vertical 🔢",
-  LIFECYCLE: "The full circle… it's a long one 🔄",
-};
-
 const WordSearchLevel = ({ onNext }: WordSearchLevelProps) => {
   const [{ grid, placements }] = useState(generateGrid);
   const [selected, setSelected] = useState<number[][]>([]);
   const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
   const [foundCells, setFoundCells] = useState<Set<string>>(new Set());
   const [isDragging, setIsDragging] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-  const [hintWord, setHintWord] = useState("");
 
   const cellKey = (r: number, c: number) => `${r}-${c}`;
 
@@ -78,8 +67,10 @@ const WordSearchLevel = ({ onNext }: WordSearchLevelProps) => {
       for (const [word, cells] of placements.entries()) {
         if (foundWords.has(word)) continue;
         if (cells.length !== sel.length) continue;
-        const forward = cells.every(([r, c], i) => sel[i][0] === r && sel[i][1] === c);
-        const backward = cells.every(([r, c], i) => sel[sel.length - 1 - i][0] === r && sel[sel.length - 1 - i][1] === c);
+
+        const forward = cells.every(([r, c], i) => sel[i]?.[0] === r && sel[i]?.[1] === c);
+        const backward = cells.every(([r, c], i) => sel[sel.length - 1 - i]?.[0] === r && sel[sel.length - 1 - i]?.[1] === c);
+
         if (forward || backward) return word;
       }
       return null;
@@ -87,14 +78,16 @@ const WordSearchLevel = ({ onNext }: WordSearchLevelProps) => {
     [placements, foundWords]
   );
 
+  // 💻 DRAG START
   const handleCellDown = (r: number, c: number) => {
     setIsDragging(true);
     setSelected([[r, c]]);
   };
 
+  // 💻 DRAG MOVE
   const handleCellEnter = (r: number, c: number) => {
     if (!isDragging) return;
-    // Only allow straight lines
+
     if (selected.length === 1) {
       setSelected((prev) => [...prev, [r, c]]);
     } else {
@@ -102,23 +95,48 @@ const WordSearchLevel = ({ onNext }: WordSearchLevelProps) => {
       const dc = selected[1][1] - selected[0][1];
       const expectedR = selected[0][0] + dr * selected.length;
       const expectedC = selected[0][1] + dc * selected.length;
+
       if (r === expectedR && c === expectedC) {
         setSelected((prev) => [...prev, [r, c]]);
       }
     }
   };
 
-  const handleMouseUp = () => {
+  // 📱 TAP MODE (NEW)
+  const handleTap = (r: number, c: number) => {
+    if (isDragging) return;
+
+    if (selected.length === 0) {
+      setSelected([[r, c]]);
+    } else if (selected.length === 1) {
+      setSelected((prev) => [...prev, [r, c]]);
+    } else {
+      const dr = selected[1][0] - selected[0][0];
+      const dc = selected[1][1] - selected[0][1];
+      const expectedR = selected[0][0] + dr * selected.length;
+      const expectedC = selected[0][1] + dc * selected.length;
+
+      if (r === expectedR && c === expectedC) {
+        setSelected((prev) => [...prev, [r, c]]);
+      }
+    }
+  };
+
+  // RELEASE / DONE
+  const handleRelease = () => {
     setIsDragging(false);
     const word = checkWord(selected);
+
     if (word) {
       const newFound = new Set(foundWords);
       newFound.add(word);
       setFoundWords(newFound);
+
       const newCells = new Set(foundCells);
       selected.forEach(([r, c]) => newCells.add(cellKey(r, c)));
       setFoundCells(newCells);
     }
+
     setSelected([]);
   };
 
@@ -128,50 +146,22 @@ const WordSearchLevel = ({ onNext }: WordSearchLevelProps) => {
     }
   }, [foundWords, onNext]);
 
-  const nextHint = () => {
-    const remaining = WORDS.filter((w) => !foundWords.has(w));
-    if (remaining.length > 0) {
-      const w = remaining[Math.floor(Math.random() * remaining.length)];
-      setHintWord(w);
-      setShowHint(true);
-    }
-  };
-
-  const isSelected = (r: number, c: number) => selected.some(([sr, sc]) => sr === r && sc === c);
+  const isSelected = (r: number, c: number) =>
+    selected.some(([sr, sc]) => sr === r && sc === c);
 
   return (
-    <div className="screen-enter flex flex-col items-center justify-center min-h-screen px-4 py-8 relative z-10">
-      <div className="animate-fade-in-up text-center mb-6">
-        <p className="text-sm uppercase tracking-widest text-muted-foreground mb-2">Level 1</p>
-        <h2 className="text-2xl md:text-3xl font-bold text-glow text-foreground mb-2">
-          Word Search 🔍
-        </h2>
-        <p className="text-sm text-muted-foreground">Find our special words hidden in the grid</p>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
 
-      {/* Words to find */}
-      <div className="flex flex-wrap justify-center gap-2 mb-6">
-        {WORDS.map((word) => (
-          <span
-            key={word}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-              foundWords.has(word)
-                ? "bg-accent/20 text-accent line-through"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {word}
-          </span>
-        ))}
-      </div>
+      <p className="text-sm mb-4">
+        💻 Drag OR 📱 tap letters and press Done
+      </p>
 
-      {/* Grid */}
       <div
-        className="inline-grid gap-1 mb-6 select-none"
+        className="inline-grid gap-1 mb-6"
         style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 36px)` }}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchEnd={handleMouseUp}
+        onMouseUp={handleRelease}
+        onMouseLeave={handleRelease}
+        onTouchEnd={handleRelease}
       >
         {grid.map((row, r) =>
           row.map((letter, c) => (
@@ -180,7 +170,8 @@ const WordSearchLevel = ({ onNext }: WordSearchLevelProps) => {
               className={`word-cell ${isSelected(r, c) ? "selected" : ""} ${foundCells.has(cellKey(r, c)) ? "found" : ""}`}
               onMouseDown={() => handleCellDown(r, c)}
               onMouseEnter={() => handleCellEnter(r, c)}
-              onTouchStart={() => handleCellDown(r, c)}
+              onClick={() => handleTap(r, c)} // 📱 support
+              onTouchStart={() => handleTap(r, c)}
             >
               {letter}
             </div>
@@ -188,24 +179,13 @@ const WordSearchLevel = ({ onNext }: WordSearchLevelProps) => {
         )}
       </div>
 
-      <p className="text-sm text-accent mb-4">
-        {foundWords.size}/{WORDS.length} words found
-      </p>
-
-      <button onClick={nextHint} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-        💡 Hint
+      {/* 📱 DONE BUTTON */}
+      <button
+        onClick={handleRelease}
+        className="px-4 py-2 bg-pink-500 text-white rounded-lg"
+      >
+        Done ✅
       </button>
-      {showHint && hintWord && (
-        <p className="mt-2 text-xs text-primary animate-fade-in-up">
-          {hints[hintWord]}
-        </p>
-      )}
-
-      {foundWords.size === WORDS.length && (
-        <div className="mt-6 animate-scale-in">
-          <p className="text-lg text-accent font-semibold">All words found! ✨</p>
-        </div>
-      )}
     </div>
   );
 };
