@@ -1,12 +1,12 @@
 import { useState } from "react";
 
 const photos = [
-  { id: 1, src: "/photos/photo1.jpg" },
-  { id: 2, src: "/photos/photo2.jpg" },
-  { id: 3, src: "/photos/photo3.jpg" },
-  { id: 4, src: "/photos/photo4.jpg" },
-  { id: 5, src: "/photos/photo5.jpg" },
-  { id: 6, src: "/photos/photo6.jpg" },
+  { id: 1, src: "/photos/photo1.jpeg" },
+  { id: 2, src: "/photos/photo2.jpeg" },
+  { id: 3, src: "/photos/photo3.jpeg" },
+  { id: 4, src: "/photos/photo4.jpeg" },
+  { id: 5, src: "/photos/photo5.jpeg" },
+  { id: 6, src: "/photos/photo6.jpeg" },
 ];
 
 const captions = [
