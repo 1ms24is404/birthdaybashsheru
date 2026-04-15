@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import StarField from "@/components/StarField";
 import IntroScreen from "@/components/IntroScreen";
 import ReadyScreen from "@/components/ReadyScreen";
@@ -21,50 +21,40 @@ type Screen =
   | "interlude"
   | "final";
 
-/*
-  MUSIC PLACEHOLDERS
-  Place your music files in the public/ folder and update these paths:
-  - Login screen: "Love Me Like You Do"
-  - Level 1: "Double Take" by dhruv
-  - Level 2: "Memories"
-  - Interlude/Final: "I Wanna Be Yours" / "Until I Found You"
-
-  Example: const MUSIC = { login: "/music/love-me-like-you-do.mp3", ... }
-*/
-
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("intro");
+
+  const mainMusic = useRef<HTMLAudioElement | null>(null);
+
+  const startMainMusic = () => {
+    if (!mainMusic.current) {
+      mainMusic.current = new Audio("/music/perfect.mp3");
+      mainMusic.current.loop = true;
+      mainMusic.current.volume = 0.5;
+    }
+    mainMusic.current.play().catch(() => {});
+  };
+
+  const pauseMainMusic = () => {
+    mainMusic.current?.pause();
+  };
+
+  const resumeMainMusic = () => {
+    mainMusic.current?.play().catch(() => {});
+  };
 
   const goTo = useCallback((next: Screen) => {
     setScreen(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (next === "ready") startMainMusic();
+    if (next === "interlude") pauseMainMusic();
+    if (next === "final") resumeMainMusic();
   }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <StarField />
-
-      {/* Progress indicator */}
-      {screen !== "intro" && screen !== "ready" && (
-        <div className="fixed top-0 left-0 right-0 h-1 bg-muted z-50">
-          <div
-            className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-700 ease-out"
-            style={{
-              width: `${
-                {
-                  login: 10,
-                  level1: 25,
-                  level2: 40,
-                  level3: 55,
-                  level4: 70,
-                  interlude: 85,
-                  final: 100,
-                }[screen] ?? 0
-              }%`,
-            }}
-          />
-        </div>
-      )}
 
       {screen === "intro" && <IntroScreen onNext={() => goTo("ready")} />}
       {screen === "ready" && <ReadyScreen onNext={() => goTo("login")} />}
