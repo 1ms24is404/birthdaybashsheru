@@ -22,10 +22,6 @@ export default function InterludeScreen({ onNext }: any) {
   useEffect(() => {
     setTimeout(() => setStart(true), 100);
 
-    const audio = new Audio("/music/interlude.mp3");
-    audio.volume = 0.7;
-    audio.play().catch(() => {});
-
     let index = 0;
 
     const runSlide = () => {
@@ -34,7 +30,7 @@ export default function InterludeScreen({ onNext }: any) {
       setTimeout(() => {
         setCurrent(index);
         setVisible(true);
-      }, 100);
+      }, 50); // synced start
 
       setTimeout(() => {
         index++;
@@ -45,19 +41,14 @@ export default function InterludeScreen({ onNext }: any) {
             setFadeOut(true);
 
             setTimeout(() => {
-              audio.pause();
               onNext();
             }, 1200);
           }, 1000);
         }
-      }, 6200);
+      }, 6200); // FULL duration (text + image together)
     };
 
     runSlide();
-
-    return () => {
-      audio.pause();
-    };
   }, []);
 
   return (
@@ -78,7 +69,7 @@ export default function InterludeScreen({ onNext }: any) {
 
       {/* TEXT */}
       <h2
-        className={`text-2xl md:text-3xl font-semibold text-white transition-all duration-[4000ms] ${
+        className={`text-2xl md:text-3xl font-semibold text-white transition-all duration-[6200ms] ${
           visible
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-10"
