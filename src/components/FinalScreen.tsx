@@ -22,9 +22,9 @@ With all my heart,
 Yours, always & forever ♾️`;
 
 const photos = [
-  "collage1.jpg", "collage2.jpg", "collage3.jpg",
-  "collage4.jpg", "collage5.jpg", "collage6.jpg",
-  "collage7.jpg", "collage8.jpg", "collage9.jpg",
+  "collage1.jpeg", "collage2.jpeg", "collage3.jpeg",
+  "collage4.jpeg", "collage5.jpeg", "collage6.jpeg",
+  "collage7.jpeg", "collage8.jpeg", "collage9.jpeg",
 ];
 
 const FinalScreen = ({}: FinalScreenProps) => {
@@ -68,7 +68,7 @@ const FinalScreen = ({}: FinalScreenProps) => {
             <h3 className="text-2xl font-bold text-glow-pink text-center mb-6 text-accent">
               Our Moments 📸
             </h3>
-            <div className="grid grid-cols-3 gap-2 md:gap-3 mb-12">
+            <div className="grid grid-cols-2 gap-4 md:gap-5 mb-12">
   {photos.map((photo, i) => (
     <div
       key={photo}
@@ -76,9 +76,10 @@ const FinalScreen = ({}: FinalScreenProps) => {
       style={{ animationDelay: `${i * 0.1}s`, opacity: 0 }}
     >
       <img 
-        src={`/collage/${photo}`} 
-        className="w-full h-full object-cover"
-      />
+  src={`/collage/${photo}`} 
+  className="w-full h-full object-cover hover:scale-105 transition duration-300"
+  alt="memory"
+/>
     </div>
   ))}
 </div>
