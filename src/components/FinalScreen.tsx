@@ -24,6 +24,7 @@ const photos = [
   "collage4.jpeg",
   "collage5.jpeg",
   "collage6.jpeg",
+  "collage7.jpeg",
 ];
 
 const FinalScreen = ({}: FinalScreenProps) => {
