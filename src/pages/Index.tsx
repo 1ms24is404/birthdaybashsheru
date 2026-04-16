@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import StarField from "@/components/StarField";
 import IntroScreen from "@/components/IntroScreen";
 import ReadyScreen from "@/components/ReadyScreen";
@@ -24,33 +24,32 @@ type Screen =
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("intro");
 
+  // Create audio ONCE on mount — never recreated
   const mainMusic = useRef<HTMLAudioElement | null>(null);
 
-  const startMainMusic = () => {
-    if (!mainMusic.current) {
-      mainMusic.current = new Audio("/music/perfect.mp3");
-      mainMusic.current.loop = true;
-      mainMusic.current.volume = 0.5;
-    }
-    mainMusic.current.play().catch(() => {});
-  };
+  useEffect(() => {
+    const audio = new Audio("/music/perfect.mp3");
+    audio.loop = true;
+    audio.volume = 0.5;
+    mainMusic.current = audio;
 
-  const pauseMainMusic = () => {
-    mainMusic.current?.pause();
-  };
+    // Cleanup on unmount
+    return () => {
+      audio.pause();
+      mainMusic.current = null;
+    };
+  }, []); // ← runs once only
 
-  const resumeMainMusic = () => {
+  const startMainMusic = useCallback(() => {
     mainMusic.current?.play().catch(() => {});
-  };
+  }, []);
 
   const goTo = useCallback((next: Screen) => {
     setScreen(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     if (next === "ready") startMainMusic();
-    if (next === "interlude") pauseMainMusic();
-    if (next === "final") resumeMainMusic();
-  }, []);
+  }, [startMainMusic]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
