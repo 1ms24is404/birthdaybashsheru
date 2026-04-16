@@ -13,43 +13,58 @@ const slides = [
   { text: "And I'll keep falling for you, always 💞", image: "/slides/slide10.jpeg" },
 ];
 
-const FADE_DURATION = 1000;   // 1s fade out + fade in
-const DISPLAY_DURATION = 5000; // 5s fully visible
+const FADE_DURATION = 1000;
+const DISPLAY_DURATION = 5000;
 
 export default function InterludeScreen({ onNext }: { onNext: () => void }) {
   const [current, setCurrent] = useState(0);
-  const [visible, setVisible] = useState(true);   // controls BOTH image and text together
+  const [visible, setVisible] = useState(true);
   const [screenFadeOut, setScreenFadeOut] = useState(false);
+
+  // Preload ALL images immediately so there's zero load delay when swapping
+  useEffect(() => {
+    slides.forEach(({ image }) => {
+      const img = new Image();
+      img.src = image;
+    });
+  }, []);
 
   useEffect(() => {
     let index = 0;
+    let t1: ReturnType<typeof setTimeout>;
+    let t2: ReturnType<typeof setTimeout>;
 
     const cycle = () => {
-      // Step 1: fade out both image and text together
+      // Step 1: fade out
       setVisible(false);
 
-      setTimeout(() => {
+      t1 = setTimeout(() => {
         index++;
 
         if (index < slides.length) {
-          // Step 2: swap content while invisible, then fade in together
+          // Step 2: content is swapped while fully invisible — no flicker possible
           setCurrent(index);
-          setVisible(true);
 
-          // Step 3: schedule next cycle
-          setTimeout(cycle, DISPLAY_DURATION);
+          // Step 3: tiny extra buffer (50ms) so React has committed the new src before fading in
+          t2 = setTimeout(() => {
+            setVisible(true);
+            // Step 4: schedule next fade-out after display duration
+            t1 = setTimeout(cycle, DISPLAY_DURATION);
+          }, 50);
         } else {
-          // All slides done — fade out entire screen
           setScreenFadeOut(true);
-          setTimeout(() => onNext(), FADE_DURATION);
+          t1 = setTimeout(() => onNext(), FADE_DURATION);
         }
       }, FADE_DURATION);
     };
 
-    // Start first cycle after display duration
-    const firstTimer = setTimeout(cycle, DISPLAY_DURATION);
+    // First slide shows immediately — start first cycle after display duration
+    t1 = setTimeout(cycle, DISPLAY_DURATION);
 
-    return () => clearTimeout(firstTimer);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [onNext]);
 
   return (
@@ -58,12 +73,17 @@ export default function InterludeScreen({ onNext }: { onNext: () => void }) {
         screenFadeOut ? "opacity-0 scale-95" : "opacity-100 scale-100"
       }`}
     >
-      {/* Image and text share the same opacity so they always move together */}
       <div
-        className="flex flex-col items-center gap-6 transition-all duration-1000"
-        style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(16px)" }}
+        className="flex flex-col items-center gap-6 transition-opacity transition-transform duration-1000"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0px)" : "translateY(16px)",
+          transitionDuration: "1000ms",
+        }}
       >
+        {/* key={current} forces React to treat each slide as a fresh element — no stale image flash */}
         <img
+          key={current}
           src={slides[current].image}
           className="w-[320px] h-[320px] object-cover rounded-xl shadow-lg"
           alt={`slide ${current + 1}`}
