@@ -5,7 +5,7 @@ const slides = [
   { text: "And suddenly everything made sense 💖", image: "/slides/slide2.jpeg" },
   { text: "Every moment with you feels magical ✨", image: "/slides/slide3.jpeg" },
   { text: "You are my safe place 🫶", image: "/slides/slide4.jpeg" },
-  { text: "My favorite person, always ❤️, this reminds me of you everytime!", image: "/slides/slide5.jpeg" },
+  { text: "My favorite person, always ❤️", image: "/slides/slide5.jpeg" },
   { text: "With you, I feel complete 🌍", image: "/slides/slide6.jpeg" },
   { text: "Every laugh with you is my favourite sound 🎶", image: "/slides/slide7.jpeg" },
   { text: "You make ordinary moments extraordinary 🌸", image: "/slides/slide8.jpeg" },
